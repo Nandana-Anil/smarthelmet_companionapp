@@ -1,12 +1,39 @@
 import React, { useState, useEffect } from "react";
 import Test from '../assets/aargh.jpg';
 import '../css/home.css';
-import firebase from 'firebase/app';
 import 'firebase/database';
+import { db } from '../firebase';
+import { getDocs, collection } from "firebase/firestore";
+
 
 
 
 function Home() {
+    const [movieList, setMovieList] = useState([]);
+
+    const moviesCollectionRef = collection(db, "movie");
+  
+    useEffect(() => {
+      const getMovieList = async() => {
+        try{
+        const data = await getDocs(moviesCollectionRef);
+        const filteredData = data.docs.map((doc) => ({...doc.data(), id: doc.id,}));
+        setMovieList(filteredData);
+        } catch(err) {
+          console.error(err);
+        }
+      };
+  
+      getMovieList();
+    }, []);
+  
+    const Alert = () => {
+      useEffect(() => {
+        alert('Crash detected!');
+      }, []);
+    
+      return null;
+    };
 
     return(
         <div>
@@ -24,10 +51,10 @@ function Home() {
         </div>
         </div>
         <div className="mt-6 ml-8 flex font-bold">
-            <p className="text-white mr-3">Slide here to ride...</p>
-        <input id="checkboxInput" type="checkbox"/>
+            <p className="text-white mr-3">Click to enable theft mode</p>
+        {/* <input id="checkboxInput" type="checkbox"/>
     <label class="toggleSwitch" for="checkboxInput">
-    </label>
+    </label> */}
     </div>
     <div className="grid grid-cols-2 gap-4 mt-4 h-1/2">
         <div className="border-[2px] rounded-custom3 border-gray-800 h-[200px] text-white">
@@ -44,6 +71,14 @@ function Home() {
 <p className="font-bold text-lg mt-7 ml-[52px]">settings</p>
         </div>
     </div>
+    <div>
+        {movieList.map((movies) => (
+           <div key={movies.id}>
+           <h1>{movies.title}</h1>
+           {movies.crash === true && <Alert />} {/* Add this line */}
+         </div>
+        ))}
+      </div>
       </div>
     );
 }
